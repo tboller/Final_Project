@@ -17,7 +17,7 @@ var teamSchema = new mongoose.Schema({
   teamName: {type: String, required: true},
   projectDescription: {type: String, required: true },
   maxTeamSize: {type: Number, required: true},
-  isFull: {type: Boolean, required: true},
+  isFull: {type: Boolean, required: true}
 });
 let Team = mongoose.model('Team', teamSchema);
 
