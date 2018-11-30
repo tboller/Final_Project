@@ -3,8 +3,8 @@ const app = express()
 const port = 3000
 
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/teamBuilder');
-// var MongoClient = require('mongodb').MongoClient;
+mongoose.connect('mongodb://tboller:password1@ds145053.mlab.com:45053/itmd462');
+var MongoClient = require('mongodb').MongoClient;
 var ObjectID = require('mongodb').ObjectID;
 
 app.use(express.json());
@@ -17,7 +17,7 @@ var teamSchema = new mongoose.Schema({
   teamName: {type: String, required: true},
   projectDescription: {type: String, required: true },
   maxTeamSize: {type: Number, required: true},
-  isFull: {type: Boolean, required: true},
+  isFull: {type: Boolean, required: true}
 });
 let Team = mongoose.model('Team', teamSchema);
 
@@ -44,6 +44,7 @@ db.once('open', function() {
   app.post('/users/current', (req,res)=>{
     //Posted form data from the edit profile page will update current
     //users profile.
+	
   });
 
   app.get('/users/current/edit', (req,res)=>{
@@ -81,9 +82,21 @@ db.once('open', function() {
     });
   });
 
-  app.get('/teams/:tid',(req,res)=>{
+  //THE ROUTE HAS TO BE :id not :tid
+  app.get('/teams/:id',(req, res, next) =>{
     //sends you to the team information page filled in with the
     //details about the team that matches the tid.
+	
+		let id = ObjectID.createFromHexString(req.params.id);
+		
+		Team.findById(id, function(err, savedTeam) {
+			if (err) {
+				console.log(err)
+				res.status(500).send("Internal Error")
+			} else {
+				res.send(savedTeam)
+			}
+		});
   });
 
   app.get('/teams/new',(req,res)=>{
@@ -96,9 +109,21 @@ db.once('open', function() {
     //tid's information only if current user is admin for tid
   });
 
-  app.post('/teams/:tid',(req,res)=>{
+  app.post('/teams',(req,res)=>{
     //sends the form from the edit/create team back to be added
     //or updated to the database
+		//This is just until we completely hash out the pages, to test the api CRUD
+		let newTeam = new Team(req.body);
+		
+		newTeam.save(function (err, savedTeam) {
+			if (err) {
+				console.log(err)
+				res.status(500).send("Internal Error")
+			} else {
+				res.send(savedTeam)
+			}			
+			
+		});
   });
 
   app.post('/teams/:tid/edit/removemember/:uid', (req,res)=>{
