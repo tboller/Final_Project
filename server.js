@@ -3,15 +3,23 @@ const app = express()
 const port = 3000
 
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/TeamProjectBuilder');
-var MongoClient = require('mongodb').MongoClient;
+mongoose.connect('mongodb://localhost/teamBuilder');
+// var MongoClient = require('mongodb').MongoClient;
 var ObjectID = require('mongodb').ObjectID;
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-//app.use(express.static('public'));
-//app.set('view engine', 'pug');
-//app.set('views',__dirname + '/views');
+app.use(express.urlencoded({extended: true }));
+app.use(express.static('public'));
+app.set('view engine', 'pug');
+app.set('views', __dirname + '/views');
+
+var teamSchema = new mongoose.Schema({
+  teamName: {type: String, required: true},
+  projectDescription: {type: String, required: true },
+  maxTeamSize: {type: Number, required: true},
+  isFull: {type: Boolean, required: true},
+});
+let Team = mongoose.model('Team', teamSchema);
 
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
@@ -61,6 +69,16 @@ db.once('open', function() {
 
   app.get('/teams',(req,res)=>{
     //sends you to the teams page which has a list/cards of all teams
+    // console.log(Team);
+    Team.find({}, function(err, teams){
+      // console.log("teams");
+      // console.log(teams);
+      if(err) {
+        res.render("error", {err});
+      } else {
+        res.render('teams', {teamList: teams});
+      }
+    });
   });
 
   app.get('/teams/:tid',(req,res)=>{
@@ -83,13 +101,13 @@ db.once('open', function() {
     //or updated to the database
   });
 
-  app.post('/teams/:tid/edit/removemember/:uid'(req,res)=>{
+  app.post('/teams/:tid/edit/removemember/:uid', (req,res)=>{
     //Removes user uid from team tid and updates the form to indicate so
     //adds user back to the available members list
     //verifies that current user is admin of team tid
   });
 
-  app.post('/teams/:tid/edit/addmember/:uid'(req,res)=>{
+  app.post('/teams/:tid/edit/addmember/:uid', (req,res)=>{
     //Adds user uid to the tid team and updates the form to indicate so
     //removes this user from available members list
     //verifies that current user is admin of team tid
@@ -107,7 +125,7 @@ db.once('open', function() {
   app.post('/teams/:tid/join',(req,res)=>{
     //allows a user to join a team and removes them from the available members list
   });
-};
+});
 
 
 app.listen(port, () => console.log(`Team Project Builder app listening on port ${port}!`))
