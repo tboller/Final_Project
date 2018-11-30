@@ -3,8 +3,8 @@ const app = express()
 const port = 3000
 
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/teamBuilder');
-// var MongoClient = require('mongodb').MongoClient;
+mongoose.connect('mongodb://tboller:password1@ds145053.mlab.com:45053/itmd462');
+var MongoClient = require('mongodb').MongoClient;
 var ObjectID = require('mongodb').ObjectID;
 
 app.use(express.json());
