@@ -3,8 +3,8 @@ const app = express()
 const port = 3000
 
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://tboller:password1@ds145053.mlab.com:45053/itmd462');
-// mongoose.connect('mongodb://localhost/teamBuilder');
+// mongoose.connect('mongodb://tboller:password1@ds145053.mlab.com:45053/itmd462');
+mongoose.connect('mongodb://localhost/teamBuilder');
 var MongoClient = require('mongodb').MongoClient;
 var ObjectID = require('mongodb').ObjectID;
 
@@ -17,8 +17,8 @@ app.set('views', __dirname + '/views');
 var teamSchema = new mongoose.Schema({
   teamName: {type: String, required: true},
   projectDescription: {type: String, required: true },
-  maxTeamSize: {type: Number, required: true},
-  isFull: {type: Boolean, required: true}
+  maxTeamSize: {type: Number, required: true, default: 3},
+  isFull: {type: Boolean, required: true, default: false}
 });
 let Team = mongoose.model('Team', teamSchema);
 
@@ -80,11 +80,18 @@ db.once('open', function() {
     });
   });
 
+  app.get('/teams/new',(req,res)=>{
+    //Sends you to the create/edit team form page which allows
+    //you to create a new team and updates user as admin of team
+    console.log("clicked new");
+    res.render('team_form', {title: "New team", team: {} })
+  });
+
   //THE ROUTE HAS TO BE :id not :tid
   app.get('/teams/:id',(req, res, next) =>{
     //sends you to the team information page filled in with the
     //details about the team that matches the tid.
-
+    console.log("clicked id");
 		let id = ObjectID.createFromHexString(req.params.id);
 
 		Team.findById(id, function(err, savedTeam) {
@@ -95,11 +102,6 @@ db.once('open', function() {
 				res.send(savedTeam)
 			}
 		});
-  });
-
-  app.get('/teams/new',(req,res)=>{
-    //Sends you to the create/edit team form page which allows
-    //you to create a new team and updates user as admin of team
   });
 
   app.get('/teams/:tid/edit',(req,res)=>{
@@ -122,6 +124,22 @@ db.once('open', function() {
 			}
 
 		});
+  });
+
+  app.post('/teams/new',(req,res)=>{
+    //sends the form from the edit/create team back to be added
+    //or updated to the database
+    //This is just until we completely hash out the pages, to test the api CRUD
+    let newTeam = new Team(req.body);
+    newTeam.save(function (err, savedTeam) {
+      if (err) {
+        console.log(err)
+        res.status(500).send("Internal Error")
+      } else {
+        // res.send(savedTeam)
+        res.redirect('/teams');
+      }
+    });
   });
 
   app.post('/teams/:tid/edit/removemember/:uid', (req,res)=>{

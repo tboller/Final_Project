@@ -1,0 +1,18 @@
+extends layout.pug
+
+block content
+  h1.mt-5= teamName
+  form(method="POST")
+    .form-group
+      label(for='teamName') Team Name
+      input#teamName.form-control(type='text', placeholder='Enter Team Name', name="teamName", value = team.teamName)
+    .form-group
+      label(for='projectDescription') Project Description
+      input#projectDescription.form-control(type='text', placeholder='Enter Description',
+      name="projectDescription", value = team.projectDescription)
+    .form-group
+      label(for='maxTeamSize') Maximum Team Size
+      input#maxTeamSize.form-control(type='text', placeholder='Enter Maximum Number of Members',
+      name="maxTeamSize", value = team.maxTeamSize)
+
+    button.btn.btn-primary(type='submit') Submit
