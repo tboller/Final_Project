@@ -154,9 +154,14 @@ db.once('open', function() {
     //verifies that current user is admin of team tid
   });
 
-  app.delete('/teams/:tid/delete',(req,res)=>{
+  app.post('/teams/:id/delete',(req,res)=>{
     //deletes the team and adds all users back to the available members list
     //verifies that current user is admin of team tid
+      let id = ObjectID.createFromHexString(req.params.id);
+      console.log("logged id: " + id);
+      Team.deleteOne({"_id": id}, function(err, product) {
+      res.redirect("/Teams");
+      });
   });
 
   app.post('/teams/leave',(req,res)=>{
