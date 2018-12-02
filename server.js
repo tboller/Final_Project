@@ -58,6 +58,8 @@ db.once('open', function() {
   app.get('/users/new', (req,res)=>{
     //TODO: Path to get to the edit profile page but instead will
     //be blank so user can create a new profile.
+    console.log("clicked get /users/new");
+    res.render('user_form', {title: "New user", user: {} })
   });
 
   app.get('/users/current', (req,res)=>{
