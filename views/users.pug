@@ -2,28 +2,18 @@ extends layout.pug
 
 block content
   h1.mt-5 Users
-    form(action='/skillSort' method="post")
-        select(name='dropDown', id='')
-            each skill in Skills
-                option=skill
-            input(type='submit', value='Sort Users')  
   table.table
     thead
       tr
-        th(scope='col') Full Name
-        th(scope='col') Username
-        th(scope='col') Looking for Group
+        th(scope='col') Team Name
+        th(scope='col') Project Description
+        th(scope='col') Max Team Size
+        th(scope='col') Is Full?
+        th(scope='col') Delete?
         th
     tbody
       each user in userList
         tr
           td
-            a(href='/users/' + user._id)= user.userName
-          td= user.projectDescription
-          td= user.maxTeamSize
-          td= user.isFull
-          td
-            form(action='/users/' + user._id + '/delete' method="POST" style="float: right; width: 87% ")
-                button.btn.btn-danger(type='submit') Delete
-          td
-            a.btn.btn-primary(href='./users/' + user.id + '/update') Edit
+            a(href='/users/' + user._id)= user.firstName
+          td= user.userName

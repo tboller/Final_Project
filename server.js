@@ -104,20 +104,31 @@ db.once('open', function() {
     //can view all profiles. Clicking on one of the cards will send them
     //to the view profile page for that specific profile.
     console.log('clicked get /users');
-	/*  This code needs to be molded to Tiffini's code once ready
-    User.find({}, function(err, teams){
+    User.find({}, function(err, users){
       if(err) {
         res.render("error", {err});
       } else {
         res.render('users', {userList: users});
       }
-    });	
-	*/
+    });
+
   });
 
-  app.get('/users/:uid',(req,res)=>{
+  app.get('/users/:id',(req,res, next)=>{
     //Will send to the view profile page loaded with the information for
     //the profile that matches the id
+    console.log("clicked get /users/:id");
+		let id = ObjectID.createFromHexString(req.params.id);
+
+		User.findById(id, function(err, user) {
+			if (err) {
+				console.log(err)
+				res.status(500).send("Internal Error")
+			} else {
+        res.render('user_display', {title: "Show User", user: user})
+				 //res.send(user)
+			}
+		});
   });
 
   app.get('/teams',(req,res)=>{
