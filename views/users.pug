@@ -5,15 +5,16 @@ block content
   table.table
     thead
       tr
-        th(scope='col') Team Name
-        th(scope='col') Project Description
-        th(scope='col') Max Team Size
-        th(scope='col') Is Full?
-        th(scope='col') Delete?
+        th(scope='col') User Name
+        th(scope='col') First Name
+        th(scope='col') Email
+        th(scope='col') In a Group?
         th
     tbody
       each user in userList
         tr
           td
-            a(href='/users/' + user._id)= user.firstName
-          td= user.userName
+            a(href='/users/' + user._id)= user.userName
+          td= user.firstName
+          td= user.email
+          td= user.partOfGroup
