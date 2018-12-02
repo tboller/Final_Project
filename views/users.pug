@@ -1,0 +1,24 @@
+extends layout.pug
+
+block content
+  h1.mt-5 Users
+  table.table
+    thead
+      tr
+        th(scope='col') Full Name
+        th(scope='col') Username
+        th(scope='col') Looking for Group
+        th
+    tbody
+      each user in userList
+        tr
+          td
+            a(href='/users/' + user._id)= user.userName
+          td= user.projectDescription
+          td= user.maxTeamSize
+          td= user.isFull
+          td
+            form(action='/users/' + user._id + '/delete' method="POST" style="float: right; width: 87% ")
+                button.btn.btn-danger(type='submit') Delete
+          td
+            a.btn.btn-primary(href='./users/' + user.id + '/update') Edit

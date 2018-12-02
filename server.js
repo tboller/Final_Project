@@ -62,6 +62,16 @@ db.once('open', function() {
     //redirects to the all profiles page from which the current users
     //can view all profiles. Clicking on one of the cards will send them
     //to the view profile page for that specific profile.
+    console.log('clicked get /users');
+	/*  This code needs to be molded to Tiffini's code once ready
+    User.find({}, function(err, teams){
+      if(err) {
+        res.render("error", {err});
+      } else {
+        res.render('users', {userList: users});
+      }
+    });	
+	*/
   });
 
   app.get('/users/:uid',(req,res)=>{
