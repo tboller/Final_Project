@@ -3,10 +3,13 @@ const app = express()
 const port = 3000
 
 var mongoose = require('mongoose');
+//this is for email validation
+require('mongoose-type-email');
 mongoose.connect('mongodb://tboller:password1@ds145053.mlab.com:45053/itmd462');
 // mongoose.connect('mongodb://localhost/teamBuilder');
 var MongoClient = require('mongodb').MongoClient;
 var ObjectID = require('mongodb').ObjectID;
+
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true }));
@@ -21,6 +24,28 @@ var teamSchema = new mongoose.Schema({
   isFull: {type: Boolean, required: true, default: false}
 });
 let Team = mongoose.model('Team', teamSchema);
+
+var userSchema = new mongoose.Schema({
+  firstName: {type: String, required: true},
+  lastName: {type: String, required: true},
+  email: {type: mongoose.SchemaTypes.Email, required: true},
+  phoneNumber: {
+    type: String,
+    validate: {
+      validator: function(v) {
+        return /\d{3}-\d{3}-\d{4}/.test(v);
+      },
+      message: props => `${props.value} is not a valid phone number!`
+    },
+    required: [true, 'User phone number required']
+  },
+  partOfGroup: {type: Boolean, required: true, default: false},
+  lookingForGroup: {type: Boolean, required: true, default: false},
+  lookingForMembers: {type: Boolean, required: true, default: false},
+  skills: [String],
+  teamId: {type: mongoose.Schema.Types.ObjectId, required: false}
+});
+let User = mongoose.model('User', userSchema);
 
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
@@ -46,6 +71,22 @@ db.once('open', function() {
     //Posted form data from the edit profile page will update current
     //users profile.
 
+  });
+  
+  app.post('/users/populate', (req,res)=>{
+    //Posted Data will be used for testing and immediate population of db
+    console.log("clicked post /users/populate");
+		let newUser = new User(req.body);
+
+		newUser.save(function (err, savedUser) {
+			if (err) {
+				console.log(err)
+				res.status(500).send("Internal Error")
+			} else {
+				res.send(savedUser)
+			}
+
+		});
   });
 
   app.get('/users/current/edit', (req,res)=>{
@@ -212,6 +253,11 @@ db.once('open', function() {
   });
 
   app.post('/teams/:tid/join',(req,res)=>{
+    //allows a user to join a team and removes them from the available members list
+  });
+
+
+  app.post('/skillSort',(req,res)=>{
     //allows a user to join a team and removes them from the available members list
   });
 });
