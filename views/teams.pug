@@ -19,9 +19,9 @@ block content
             a(href='/teams/' + team._id)= team.teamName
           td= team.projectDescription
           td= team.maxTeamSize
-          td= team.isFull
+          td= (team.isFull == true? 'Yes':'No')
           td
             form(action='/teams/' + team._id + '/delete' method="POST" style="float: right; width: 87% ")
-                button.btn.btn-danger(type='submit') Delete
+              button.btn.btn-danger(type='submit') Delete
           td
             a.btn.btn-primary(href='./teams/' + team.id + '/update') Edit
