@@ -122,10 +122,6 @@ db.once('open', function() {
       }
     });
   });
-  app.get('/teams/:tid/edit',(req,res)=>{
-    //sends you to the edit page with the form filled in with
-    //tid's information only if current user is admin for tid
-  });
 
   app.post('/teams',(req,res)=>{
     //sends the form from the edit/create team back to be added
