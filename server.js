@@ -3,8 +3,8 @@ const app = express()
 const port = 3000
 
 var mongoose = require('mongoose');
-// mongoose.connect('mongodb://tboller:password1@ds145053.mlab.com:45053/itmd462');
-mongoose.connect('mongodb://localhost/teamBuilder');
+mongoose.connect('mongodb://tboller:password1@ds145053.mlab.com:45053/itmd462');
+// mongoose.connect('mongodb://localhost/teamBuilder');
 var MongoClient = require('mongodb').MongoClient;
 var ObjectID = require('mongodb').ObjectID;
 
@@ -71,6 +71,7 @@ db.once('open', function() {
 
   app.get('/teams',(req,res)=>{
     //sends you to the teams page which has a list/cards of all teams
+    console.log('clicked get /teams');
     Team.find({}, function(err, teams){
       if(err) {
         res.render("error", {err});
@@ -83,7 +84,7 @@ db.once('open', function() {
   app.get('/teams/new',(req,res)=>{
     //Sends you to the create/edit team form page which allows
     //you to create a new team and updates user as admin of team
-    console.log("clicked new");
+    console.log("clicked get /teams/new");
     res.render('team_form', {title: "New team", team: {} })
   });
 
@@ -91,19 +92,36 @@ db.once('open', function() {
   app.get('/teams/:id',(req, res, next) =>{
     //sends you to the team information page filled in with the
     //details about the team that matches the tid.
-    console.log("clicked id");
+    console.log("clicked get /teams/:id");
 		let id = ObjectID.createFromHexString(req.params.id);
 
-		Team.findById(id, function(err, savedTeam) {
+		Team.findById(id, function(err, team) {
 			if (err) {
 				console.log(err)
 				res.status(500).send("Internal Error")
 			} else {
-				res.send(savedTeam)
+        res.render('team_display', {title: "Show Team", team: team})
+				// res.send(savedTeam)
 			}
 		});
   });
 
+  app.get('/teams/:id/update',(req, res) => {
+    console.log("clicked get /teams/:id/update");
+    let id = ObjectID.createFromHexString(req.params.id);
+    Team.findById(id, function(err, team) {
+      if(err) {
+        console.log(err);
+        res.render('error', {err});
+      } else {
+        if(team === null) {
+          res.render('error', {message: "Not Found"});
+        } else {
+          res.render('team_form', {title: "Update Team", team: team})
+        }
+      }
+    });
+  });
   app.get('/teams/:tid/edit',(req,res)=>{
     //sends you to the edit page with the form filled in with
     //tid's information only if current user is admin for tid
@@ -113,6 +131,7 @@ db.once('open', function() {
     //sends the form from the edit/create team back to be added
     //or updated to the database
 		//This is just until we completely hash out the pages, to test the api CRUD
+    console.log("clicked post /teams");
 		let newTeam = new Team(req.body);
 
 		newTeam.save(function (err, savedTeam) {
@@ -130,6 +149,7 @@ db.once('open', function() {
     //sends the form from the edit/create team back to be added
     //or updated to the database
     //This is just until we completely hash out the pages, to test the api CRUD
+    console.log("clicked post /teams/new");
     let newTeam = new Team(req.body);
     newTeam.save(function (err, savedTeam) {
       if (err) {
@@ -138,6 +158,21 @@ db.once('open', function() {
       } else {
         // res.send(savedTeam)
         res.redirect('/teams');
+      }
+    });
+  });
+
+  app.post('/teams/:id/update', (req, res) => {
+    console.log("clicked post /teams/:id/update");
+
+    let id = ObjectID.createFromHexString(req.params.id);
+    Team.updateOne({"_id": id},{$set: req.body}, function(err, localRes) {
+      if(err) {
+        console.log(err);
+        res.render('error', {});
+      } else {
+        // res.redirect("/teams/" + id);
+        res.redirect("/teams");
       }
     });
   });
@@ -157,10 +192,12 @@ db.once('open', function() {
   app.post('/teams/:id/delete',(req,res)=>{
     //deletes the team and adds all users back to the available members list
     //verifies that current user is admin of team tid
+      console.log("/teams/:id/delete post");
       let id = ObjectID.createFromHexString(req.params.id);
       console.log("logged id: " + id);
       Team.deleteOne({"_id": id}, function(err, product) {
-      res.redirect("/Teams");
+        console.log("hit the delete one");
+        res.redirect("/Teams");
       });
   });
 
