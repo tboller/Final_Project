@@ -2,6 +2,11 @@ extends layout.pug
 
 block content
   h1.mt-5 Users
+    form(action='/skillSort' method="post")
+        select(name='dropDown', id='')
+            each skill in Skills
+                option=skill
+            input(type='submit', value='Sort Users')  
   table.table
     thead
       tr
