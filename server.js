@@ -5,8 +5,8 @@ const port = 3000
 var mongoose = require('mongoose');
 //this is for email validation
 require('mongoose-type-email');
-mongoose.connect('mongodb://tboller:password1@ds145053.mlab.com:45053/itmd462');
-// mongoose.connect('mongodb://localhost/teamBuilder');
+// mongoose.connect('mongodb://tboller:password1@ds145053.mlab.com:45053/itmd462');
+mongoose.connect('mongodb://localhost/teamBuilder');
 var MongoClient = require('mongodb').MongoClient;
 var ObjectID = require('mongodb').ObjectID;
 
@@ -29,7 +29,7 @@ var userSchema = new mongoose.Schema({
   firstName: {type: String, required: true},
   lastName: {type: String, required: true},
   email: {type: mongoose.SchemaTypes.Email, required: true},
-  userName: {type: String, required: true},  
+  userName: {type: String, required: true},
   phoneNumber: {
     type: String,
     validate: {
@@ -75,7 +75,7 @@ db.once('open', function() {
     //users profile.
 
   });
-  
+
   app.post('/users/populate', (req,res)=>{
     //Posted Data will be used for testing and immediate population of db
     console.log("clicked post /users/populate");
@@ -90,6 +90,20 @@ db.once('open', function() {
 			}
 
 		});
+  });
+
+  app.get('/users/team/:id', (req, res) => {
+    // gets the current users with this team id
+    console.log("Clicked get /users/team/:id");
+    let id = ObjectID.createFromHexString(req.params.id);
+
+    User.find({"teamId": id}, function(err, users){
+      if(err) {
+        res.render("error", {err});
+      } else {
+        res.render('users', {userList: users});
+      }
+    });
   });
 
   app.get('/users/current/edit', (req,res)=>{
@@ -134,6 +148,72 @@ db.once('open', function() {
 		});
   });
 
+  app.get('/users/:id/update',(req, res) => {
+    console.log("clicked get /users/:id/update");
+    let id = ObjectID.createFromHexString(req.params.id);
+    User.findById(id, function(err, user) {
+      if(err) {
+        console.log(err);
+        res.render('error', {err});
+      } else {
+        if(user === null) {
+          res.render('error', {message: "Not Found"});
+        } else {
+          res.render('user_form', {title: "Update User", user: user})
+        }
+      }
+    });
+  });
+
+  app.post('/users/:id/update', (req, res) => {
+    console.log("clicked post /users/:id/update");
+
+    let id = ObjectID.createFromHexString(req.params.id);
+    User.updateOne({"_id": id},{$set: req.body}, function(err, localRes) {
+      if(err) {
+        console.log(err);
+        res.render('error', {});
+      } else {
+        // res.redirect("/teams/" + id);
+        res.redirect("/users");
+      }
+    });
+  });
+
+  app.post('/users/:id/delete',(req,res)=>{
+    //deletes a user
+      console.log("/users/:id/delete post");
+      let id = ObjectID.createFromHexString(req.params.id);
+
+//      take the id and lookup the user. check if they are a member of a team.
+//      if they are, update the team flag full flag to false
+
+      console.log("logged id: " + id);
+      User.deleteOne({"_id": id}, function(err, product) {
+        console.log("hit the delete one");
+        res.redirect("/Users");
+      });
+  });
+
+  app.post('/users/new',(req,res)=>{
+    //sends the form from the edit/create team back to be added
+    //or updated to the database
+    //This is just until we completely hash out the pages, to test the api CRUD
+    console.log("clicked post /users/new");
+    let newUser = new User(req.body);
+    console.log(newUser);
+    newUser.save(function (err, savedUser) {
+      if (err) {
+        console.log(err)
+        res.status(500).send("Internal Error")
+      } else {
+        // res.send(savedTeam)
+        res.redirect('/users');
+      }
+    });
+  });
+
+
   app.get('/teams',(req,res)=>{
     //sends you to the teams page which has a list/cards of all teams
     console.log('clicked get /teams');
@@ -153,7 +233,6 @@ db.once('open', function() {
     res.render('team_form', {title: "New team", team: {} })
   });
 
-  //THE ROUTE HAS TO BE :id not :tid
   app.get('/teams/:id',(req, res, next) =>{
     //sends you to the team information page filled in with the
     //details about the team that matches the tid.
@@ -166,12 +245,12 @@ db.once('open', function() {
 				res.status(500).send("Internal Error")
 			} else {
         res.render('team_display', {title: "Show Team", team: team})
-				// res.send(savedTeam)
 			}
 		});
   });
 
   app.get('/teams/:id/update',(req, res) => {
+    // sends you to the team_form to be updated
     console.log("clicked get /teams/:id/update");
     let id = ObjectID.createFromHexString(req.params.id);
     Team.findById(id, function(err, team) {
@@ -188,23 +267,23 @@ db.once('open', function() {
     });
   });
 
-  app.post('/teams',(req,res)=>{
+  // this needs to be removed.  same signature above
+//  app.post('/teams',(req,res)=>{
     //sends the form from the edit/create team back to be added
     //or updated to the database
 		//This is just until we completely hash out the pages, to test the api CRUD
-    console.log("clicked post /teams");
-		let newTeam = new Team(req.body);
+//    console.log("clicked post /teams");
+//		let newTeam = new Team(req.body);
 
-		newTeam.save(function (err, savedTeam) {
-			if (err) {
-				console.log(err)
-				res.status(500).send("Internal Error")
-			} else {
-				res.send(savedTeam)
-			}
-
-		});
-  });
+//		newTeam.save(function (err, savedTeam) {
+//			if (err) {
+//				console.log(err)
+//				res.status(500).send("Internal Error")
+//			} else {
+//				res.send(savedTeam)
+//			}
+//		});
+//  });
 
   app.post('/teams/new',(req,res)=>{
     //sends the form from the edit/create team back to be added
@@ -253,9 +332,16 @@ db.once('open', function() {
   app.post('/teams/:id/delete',(req,res)=>{
     //deletes the team and adds all users back to the available members list
     //verifies that current user is admin of team tid
+
+    // Need to do the verification
+
+
       console.log("/teams/:id/delete post");
       let id = ObjectID.createFromHexString(req.params.id);
-      console.log("logged id: " + id);
+      // need to lookup any users that have this teams id
+      // and remove the Id, set the looking for group to true,
+      // and set the part of group to false (do we need both of these fields?)
+
       Team.deleteOne({"_id": id}, function(err, product) {
         console.log("hit the delete one");
         res.redirect("/Teams");

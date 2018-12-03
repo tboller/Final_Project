@@ -2,4 +2,28 @@ extends layout.pug
 
 block content
   h1.mt-5= UserName
+  .form-group
+    label(for='userName') User Name
+    input#userName.form-control(type='text', placeholder='Enter User Name', name="userName", value = user.userName readonly)
+  .form-group
+    label(for='firstName') First Name
+    input#firstName.form-control(type='text', placeholder='Enter First Name',
+    name="firstName", value = user.firstName readonly)
+  .form-group
+    label(for='lastName') Last Name
+    input#lastName.form-control(type='text', placeholder='Enter Last Name',
+    name="lastName", value = user.lastName readonly)
+  .form-group
+    label(for='email') Email
+    input#email.form-control(type='text', placeholder='uname@school.edu',
+    name="email", value = user.email readonly)
+  .form-group
+    label(for='phoneNumber') Phone Number
+    input#phoneNumber.form-control(type='text', placeholder='Skills',
+    name="phoneNumber", value = user.phoneNumber readonly)
+  .form-group
+    label(for='skills') Skills
+    input#skills.form-control(type='text', placeholder='630-123-4567',
+    name="skills", value = user.skills readonly)
 
+  a.btn.btn-primary(href='./' + user.id + '/update') Edit    

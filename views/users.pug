@@ -2,19 +2,5 @@ extends layout.pug
 
 block content
   h1.mt-5 Users
-  table.table
-    thead
-      tr
-        th(scope='col') User Name
-        th(scope='col') First Name
-        th(scope='col') Email
-        th(scope='col') In a Group?
-        th
-    tbody
-      each user in userList
-        tr
-          td
-            a(href='/users/' + user._id)= user.userName
-          td= user.firstName
-          td= user.email
-          td= user.partOfGroup
+    a.btn.btn-primary(href='./users/new/' style='margin-left: 25px') Create New User
+  include user_table.pug

@@ -1,0 +1,21 @@
+table.table
+  thead
+    tr
+      th(scope='col') User Name
+      th(scope='col') First Name
+      th(scope='col') Email
+      th(scope='col') In a Group?
+      th
+  tbody
+    each user in userList
+      tr
+        td
+          a(href='/users/' + user._id)= user.userName
+        td= user.firstName
+        td= user.email
+        td= user.partOfGroup
+        td
+          form(action='/users/' + user._id + '/delete' method="POST" style="float: right; width: 87% ")
+            button.btn.btn-danger(type='submit') Delete
+        td
+          a.btn.btn-primary(href='./users/' + user.id + '/update') Edit

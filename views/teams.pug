@@ -12,11 +12,12 @@ block content
         th(scope='col') Is Full?
         th(scope='col') Delete?
         th
+        th
     tbody
       each team in teamList
         tr
           td
-            a(href='/teams/' + team._id)= team.teamName
+            a(href='/users/team/' + team._id)= team.teamName
           td= team.projectDescription
           td= team.maxTeamSize
           td= (team.isFull == true? 'Yes':'No')
@@ -25,3 +26,5 @@ block content
               button.btn.btn-danger(type='submit') Delete
           td
             a.btn.btn-primary(href='./teams/' + team.id + '/update') Edit
+          td
+            a.btn.btn-primary(href='/users/team/' + team._id) Add User
