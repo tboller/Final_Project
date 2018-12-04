@@ -158,7 +158,29 @@ db.once('open', function() {
     });
   });
 
-  app.delete('/users/current/delete',(req,res)=>{
+  app.post('/users/current/edit', (req, res) => {
+    //console.log("clicked post /users/:id/update");
+    User.updateOne({"_id": currentUser.id},{$set: req.body}, function(err, updatedUser) {
+      if(err) {
+        console.log(err);
+        res.render('error', {});
+      } else {
+        // res.redirect("/teams/" + id);
+        User.findOne({"_id": currentUser.id}, function(err, user){
+          if(err) {
+            res.render("error", {err});
+          } else {
+            currentUser = user;
+          }
+        });
+
+        console.log(currentUser)
+        res.redirect("/users");
+      }
+    });
+  });
+
+  app.post('/users/current/delete',(req,res)=>{
     //will delete the current users profile and then send them back
     //to the log in page.
     User.deleteOne({"_id": currentUser.id}, function(err, product) {
