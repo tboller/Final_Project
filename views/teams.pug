@@ -17,7 +17,7 @@ block content
       each team in teamList
         tr
           td
-            a(href='/users/team/' + team._id)= team.teamName
+            a(href='/teams/' + team._id)= team.teamName
           td= team.projectDescription
           td= team.maxTeamSize
           td= (team.isFull == true? 'Yes':'No')

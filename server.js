@@ -109,8 +109,7 @@ db.once('open', function() {
   app.get('/users/current', (req,res)=>{
     //this path from the log in page sends you to the view
     //profile page of the profile of the person that logged in.
-    //res.render('user_display', {title: "Current User", user: currentUser})
-    res.render('user_display', {title: "Current User", user: currentUser, authorized: true})
+      res.render('user_display', {title: "Current User", user: currentUser, authorized: true})
   });
 
 
@@ -171,7 +170,7 @@ db.once('open', function() {
         res.render('error', {});
       } else {
         // res.redirect("/teams/" + id);
-        User.findOne({"_id": currentUser.id}, function(err, user){
+        User.findById({"_id": currentUser.id}, function(err, user){
           if(err) {
             res.render("error", {err});
           } else {
@@ -179,13 +178,13 @@ db.once('open', function() {
           }
         });
 
-        console.log(currentUser)
+        //console.log(currentUser)
         res.redirect("/users");
       }
     });
   });
 
-  //TODO: still needs to update the team full flag to false if they were a part of a team. 
+  //TODO: still needs to update the team full flag to false if they were a part of a team.
   app.post('/users/current/delete',(req,res)=>{
     //will delete the current users profile and then send them back
     //to the log in page.
@@ -202,13 +201,18 @@ db.once('open', function() {
     //can view all profiles. Clicking on one of the cards will send them
     //to the view profile page for that specific profile.
     console.log('clicked get /users');
-    User.find({}, function(err, users){
-      if(err) {
-        res.render("error", {err});
-      } else {
-        res.render('users', {userList: users});
-      }
-    });
+    if(currentUser === undefined){
+      res.redirect('/')
+    } else {
+      User.find({}, function(err, users){
+        if(err) {
+          res.render("error", {err});
+        } else {
+          res.render('users', {userList: users});
+        }
+      });
+    }
+
   });
 
   //done
@@ -286,13 +290,17 @@ db.once('open', function() {
   app.get('/teams',(req,res)=>{
     //sends you to the teams page which has a list/cards of all teams
     console.log('clicked get /teams');
-    Team.find({}, function(err, teams){
-      if(err) {
-        res.render("error", {err});
-      } else {
-        res.render('teams', {teamList: teams});
-      }
-    });
+    if(currentUser === undefined){
+      res.redirect('/')
+    } else {
+      Team.find({}, function(err, teams){
+        if(err) {
+          res.render("error", {err});
+        } else {
+          res.render('teams', {teamList: teams});
+        }
+      });
+    }
   });
 
   app.get('/teams/new',(req,res)=>{
@@ -313,7 +321,7 @@ db.once('open', function() {
 				console.log(err)
 				res.status(500).send("Internal Error")
 			} else {
-        res.render('team_display', {title: "Show Team", team: team})
+        res.render('team_display', {title: "Show Team", team: team, userList: {}})
 			}
 		});
   });

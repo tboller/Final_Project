@@ -15,5 +15,6 @@ block content
       input#maxTeamSize.form-control(type='text', placeholder='Enter Maximum Number of Members',
       name="maxTeamSize", value = team.maxTeamSize readonly)
 
-    // include user_table.pug
+    p Team Members
+    include user_table.pug
     a.btn.btn-primary(href='./' + team.id + '/update') Edit
