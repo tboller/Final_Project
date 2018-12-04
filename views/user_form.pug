@@ -1,7 +1,7 @@
 extends layout.pug
 
 block content
-  h1.mt-5= userName
+  h1.mt-5= title
   form(method="POST")
     .form-group
       label(for='userName') User Name
@@ -22,4 +22,8 @@ block content
       label(for='phoneNumber') Phone Number
       input#phoneNumber.form-control(type='text', placeholder='630-123-4567',
       name="phoneNumber", value = user.phoneNumber)
+    .form-group
+      label(for='skills') Skills
+      input#skills.form-control(type='text', placeholder='skills',
+      name="skills", value = user.skills)
     button.btn.btn-primary(type='submit') Submit
