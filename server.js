@@ -190,6 +190,15 @@ db.once('open', function() {
   app.post('/users/current/delete',(req,res)=>{
     //will delete the current users profile and then send them back
     //to the log in page.
+    Team.findById(currentUser.teamId, function(err, team){
+      if(currentUser.id == team.admin){
+        res.redirect('/users/'+team.id+'/delete') // delete the team.. cant exist without admin
+      } else {
+        Team.updateOne({"_id":team.id},{currentTeamSize:team.currentTeamSize-1, isFull:false}, function(err,result){
+        })
+      }
+    });
+
     User.deleteOne({"_id": currentUser.id}, function(err, product) {
       console.log("hit the delete one");
       currentUser = undefined;
@@ -288,7 +297,7 @@ db.once('open', function() {
       });
   });
 
-
+  //done
   app.get('/teams',(req,res)=>{
     //sends you to the teams page which has a list/cards of all teams
     console.log('clicked get /teams');
@@ -305,6 +314,7 @@ db.once('open', function() {
     }
   });
 
+  //done
   app.get('/teams/new',(req,res)=>{
     //Sends you to the create/edit team form page which allows
     //you to create a new team and updates user as admin of team
@@ -312,6 +322,7 @@ db.once('open', function() {
     res.render('team_form', {title: "New team", team: {}, userList: {}})
   });
 
+  //cant seem to get the team members list to populate
   app.get('/teams/:id',(req, res, next) =>{
     //sends you to the team information page filled in with the
     //details about the team that matches the tid.
@@ -343,6 +354,7 @@ db.once('open', function() {
 		});
   });
 
+  //done
   app.get('/teams/:id/update',(req, res) => {
     // sends you to the team_form to be updated
     console.log("clicked get /teams/:id/update");
@@ -371,6 +383,7 @@ db.once('open', function() {
     });
   });
 
+  //done
   app.post('/teams/new',(req,res)=>{
     //sends the form from the edit/create team back to be added
     //or updated to the database
@@ -402,6 +415,7 @@ db.once('open', function() {
     });
   });
 
+  //done?
   app.post('/teams/:id/update', (req, res) => {
     console.log("clicked post /teams/:id/update");
 
@@ -417,6 +431,7 @@ db.once('open', function() {
     });
   });
 
+  //done
   app.post('/teams/edit/removemember/:uid', (req,res)=>{
     //Removes user uid from team tid and updates the form to indicate so
     //adds user back to the available members list
@@ -437,12 +452,14 @@ db.once('open', function() {
     });
   });
 
+  //TODO: The update page isn't really working nicely to be able to add members.
   app.post('/teams/edit/addmember/:uid', (req,res)=>{
     //Adds user uid to the tid team and updates the form to indicate so
     //removes this user from available members list
     //verifies that current user is admin of team tid
   });
 
+  //TODO: Need to deal with changing the information for the users of the team
   app.post('/teams/:id/delete',(req,res)=>{
     //deletes the team and adds all users back to the available members list
     //verifies that current user is admin of team tid
@@ -462,6 +479,7 @@ db.once('open', function() {
       });
   });
 
+  //done
   app.post('/teams/leave',(req,res)=>{
     //allows a user to leave their team and adds them back to the available users list
     Team.findById(currentUser.teamId, function(err, team){
@@ -485,6 +503,7 @@ db.once('open', function() {
     });
   });
 
+  //done
   app.post('/teams/:tid/join',(req,res)=>{
     //allows a user to join a team and removes them from the available members list
     console.log("got to /teams/tid/join")
