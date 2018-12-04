@@ -50,6 +50,7 @@ var userSchema = new mongoose.Schema({
 });
 let User = mongoose.model('User', userSchema);
 
+//variable holds the current logged in user
 let currentUser = undefined;
 
 var db = mongoose.connection;
@@ -596,11 +597,7 @@ db.once('open', function() {
     });
 
   });
-
-
-  app.post('/skillSort',(req,res)=>{
-    //allows a user to join a team and removes them from the available members list
-  });
+  
 });
 
 app.listen(port, () => console.log(`Team Project Builder app listening on port ${port}!`))
