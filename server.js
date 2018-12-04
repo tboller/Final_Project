@@ -5,8 +5,8 @@ const port = 3000
 var mongoose = require('mongoose');
 //this is for email validation
 require('mongoose-type-email');
-// mongoose.connect('mongodb://tboller:password1@ds145053.mlab.com:45053/itmd462');
-mongoose.connect('mongodb://localhost/teamBuilder');
+mongoose.connect('mongodb://tboller:password1@ds145053.mlab.com:45053/itmd462');
+//mongoose.connect('mongodb://localhost/teamBuilder');
 var MongoClient = require('mongodb').MongoClient;
 var ObjectID = require('mongodb').ObjectID;
 
