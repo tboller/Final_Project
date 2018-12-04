@@ -26,4 +26,7 @@ block content
     input#skills.form-control(type='text', placeholder='630-123-4567',
     name="skills", value = user.skills readonly)
 
-  a.btn.btn-primary(href='./' + user.id + '/update') Edit    
+  if authorized
+    a.btn.btn-primary(href='./current/edit') Edit
+    form(action='/users/current/delete' method="DELETE" style="float: right; width: 87% ")
+      button.btn.btn-danger(type='submit') Delete

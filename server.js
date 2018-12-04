@@ -48,32 +48,67 @@ var userSchema = new mongoose.Schema({
 });
 let User = mongoose.model('User', userSchema);
 
+let currentUser = undefined;
+
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function() {
+  //done
   app.get('/', (req,res)=>{
-    //TODO: This is the path for the login page
+    //This is the path for the login page
+    res.render('login');
   });
 
+  //done
+  app.post('/', (req,res)=>{
+    //this is the post from the login page. must check if username exists in the database, if not redirect to new user, if so redirect to current user info.
+    let userName = req.body;
+    User.findOne(req.body, function(err, user){
+      if(err) {
+        res.render("error", {err});
+      } else {
+        currentUser = user;
+        if(currentUser === null){
+          res.redirect('/users/new');
+        } else {
+          res.redirect('/users/current');
+        }
+      }
+    });
+
+  });
+
+  //done
   app.get('/users/new', (req,res)=>{
-    //TODO: Path to get to the edit profile page but instead will
+    //Path to get to the edit profile page but instead will
     //be blank so user can create a new profile.
     console.log("clicked get /users/new");
     res.render('user_form', {title: "New user", user: {} })
   });
 
-  app.get('/users/current', (req,res)=>{
-    //TODO: this path from the log in page sends you to the view
-    //profile page of the profile of the person that logged in.
-    //Also will update currentUser variable to the indicated user
-    //profile based off of the form data that is passed in from
-    //the log in page.
+  app.post('/users/new',(req,res)=>{
+    //sends the form from the edit/create team back to be added
+    //or updated to the database
+    //This is just until we completely hash out the pages, to test the api CRUD
+    console.log("clicked post /users/new");
+    let newUser = new User(req.body);
+    console.log(newUser);
+    newUser.save(function (err, savedUser) {
+      if (err) {
+        console.log(err)
+        res.status(500).send("Internal Error")
+      } else {
+        currentUser = newUser;
+        res.redirect('/users/current');
+      }
+    });
   });
 
-  app.post('/users/current', (req,res)=>{
-    //Posted form data from the edit profile page will update current
-    //users profile.
-
+  app.get('/users/current', (req,res)=>{
+    //this path from the log in page sends you to the view
+    //profile page of the profile of the person that logged in.
+    //res.render('user_display', {title: "Current User", user: currentUser})
+    res.render('user_display', {title: "Current User", user: currentUser, authorized: true})
   });
 
   app.post('/users/populate', (req,res)=>{
@@ -109,11 +144,28 @@ db.once('open', function() {
   app.get('/users/current/edit', (req,res)=>{
     //Will send the user to the edit profile page with the data from
     //their current profile already filled in to the blanks
+    User.findById(currentUser.id, function(err, user) {
+      if(err) {
+        console.log(err);
+        res.render('error', {err});
+      } else {
+        if(user === null) {
+          res.render('error', {message: "Not Found"});
+        } else {
+          res.render('user_form', {title: "Update User", user: currentUser})
+        }
+      }
+    });
   });
 
   app.delete('/users/current/delete',(req,res)=>{
     //will delete the current users profile and then send them back
     //to the log in page.
+    User.deleteOne({"_id": currentUser.id}, function(err, product) {
+      console.log("hit the delete one");
+      currentUser = undefined;
+      res.redirect("/");
+    });
   });
 
   app.get('/users',(req,res)=>{
@@ -128,7 +180,6 @@ db.once('open', function() {
         res.render('users', {userList: users});
       }
     });
-
   });
 
   app.get('/users/:id',(req,res, next)=>{
@@ -142,12 +193,16 @@ db.once('open', function() {
 				console.log(err)
 				res.status(500).send("Internal Error")
 			} else {
-        res.render('user_display', {title: "Show User", user: user})
-				 //res.send(user)
+        if(id == currentUser.id){
+          res.redirect('/users/current')
+        } else {
+          res.render('user_display', {title: "Show User", user: user, authroized: false})
+        }
 			}
 		});
   });
 
+  //you shouldnt be able to do this.. but i am going to leave it here anyways as an API feature, but this route wont be called anywhere
   app.get('/users/:id/update',(req, res) => {
     console.log("clicked get /users/:id/update");
     let id = ObjectID.createFromHexString(req.params.id);
@@ -165,6 +220,7 @@ db.once('open', function() {
     });
   });
 
+  //you shouldnt be able to do this.. but i am going to leave it here anyways as an API feature, but this route wont be called anywhere
   app.post('/users/:id/update', (req, res) => {
     console.log("clicked post /users/:id/update");
 
@@ -180,6 +236,7 @@ db.once('open', function() {
     });
   });
 
+  //you shouldnt be able to do this.. but i am going to leave it here anyways as an API feature, but this route wont be called anywhere
   app.post('/users/:id/delete',(req,res)=>{
     //deletes a user
       console.log("/users/:id/delete post");
@@ -193,24 +250,6 @@ db.once('open', function() {
         console.log("hit the delete one");
         res.redirect("/Users");
       });
-  });
-
-  app.post('/users/new',(req,res)=>{
-    //sends the form from the edit/create team back to be added
-    //or updated to the database
-    //This is just until we completely hash out the pages, to test the api CRUD
-    console.log("clicked post /users/new");
-    let newUser = new User(req.body);
-    console.log(newUser);
-    newUser.save(function (err, savedUser) {
-      if (err) {
-        console.log(err)
-        res.status(500).send("Internal Error")
-      } else {
-        // res.send(savedTeam)
-        res.redirect('/users');
-      }
-    });
   });
 
 
