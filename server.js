@@ -57,10 +57,13 @@ db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function() {
   //done
   app.get('/', (req,res)=>{
-    //This is the path for the login page
-    res.render('login');
+    //This is the path for the splash
+	res.render('index');
   });
-
+  app.get('/login', (req,res)=>{
+    //This is the path for the splash
+	res.render('login');
+  });  
   //done
   app.post('/', (req,res)=>{
     //this is the post from the login page. must check if username exists in the database, if not redirect to new user, if so redirect to current user info.

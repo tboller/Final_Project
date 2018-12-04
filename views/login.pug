@@ -2,7 +2,7 @@ extends layout.pug
 
 block content
   h1.mt-5= "Log In"
-  form(method="POST")
+  form(action='/' method="POST")
     .form-group
       label(for='userName') User Name
       input#userName.form-control(type='text', placeholder='Enter User Name', name="userName")
