@@ -20,5 +20,5 @@ table.table
               button.btn.btn-danger(type='submit') Delete
         td
           if removingUserFromTeam
-            form(action='/teams/'+ tid +'/edit/removemember/' + user._id method="POST" style="float: right; width: 87% ")
-              button.btn.btn-danger(type='submit') Delete
+            form(action='/teams/edit/removemember/'+user._id method="POST" style="float: right; width: 87% ")
+              button.btn.btn-danger(type='submit') Remove

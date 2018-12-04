@@ -2,21 +2,29 @@ extends layout.pug
 
 block content
   h1.mt-5= teamName
-  .form-group
-    label(for='teamName') Team Name
-    input#teamName.form-control(type='text', placeholder='Enter Team Name', name="teamName", value = team.teamName readonly)
-  .form-group
-    label(for='projectDescription') Project Description
-    input#projectDescription.form-control(type='text', placeholder='Enter Description',
-    name="projectDescription", value = team.projectDescription readonly)
-  .form-group
-    label(for='maxTeamSize') Maximum Team Size
-    input#maxTeamSize.form-control(type='text', placeholder='Enter Maximum Number of Members',
-    name="maxTeamSize", value = team.maxTeamSize readonly)
+  form()
+    .form-group
+      label(for='teamName') Team Name
+      input#teamName.form-control(type='text', placeholder='Enter Team Name', name="teamName", value = team.teamName readonly)
+    .form-group
+      label(for='projectDescription') Project Description
+      input#projectDescription.form-control(type='text', placeholder='Enter Description',
+      name="projectDescription", value = team.projectDescription readonly)
+    .form-group
+      label(for='maxTeamSize') Maximum Team Size
+      input#maxTeamSize.form-control(type='text', placeholder='Enter Maximum Number of Members',
+      name="maxTeamSize", value = team.maxTeamSize readonly)
 
-  p Team Members
-  include user_table.pug
-  a.btn.btn-primary(href='./' + team._id + '/update') Edit
-  if !teamFull
+    p Team Members
+    include user_table.pug
+
+  if authorized
+    a.btn.btn-primary(href='./' + team._id + '/update') Edit
+    form(action='/teams/'+team._id+'/delete' method="POST" style="float: right; width: 87% ")
+      button.btn.btn-danger(type='submit') Delete
+  else if !teamFull && currentUser.lookingForGroup
     form(action='/teams/' + team._id + '/join' method="POST" style="float: right; width: 87% ")
       button.btn.btn-success(type='submit') Join
+  else if team.id == currentUser.teamId
+    form(action='/teams/leave' method="POST" style="float: right; width: 87% ")
+      button.btn.btn-danger(type='submit') Leave

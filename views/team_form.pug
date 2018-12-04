@@ -18,4 +18,5 @@ block content
     p Team Members
     include user_table.pug
     button.btn.btn-primary(type='submit') Save
-    a.btn.btn-primary(onclick='confirm("Future Transfer to Add Member Screen (need to carry teamid)")') Add Member
+    if !team.isFull
+      a.btn.btn-primary(onclick='confirm("Future Transfer to Add Member Screen (need to carry teamid)")') Add Member

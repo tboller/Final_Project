@@ -2,7 +2,8 @@ extends layout.pug
 
 block content
   h1.mt-5 Teams
-    a.btn.btn-primary(href='./teams/new/' style='margin-left: 25px') Create New Team
+    if currentUser.lookingForGroup
+      a.btn.btn-primary(href='./teams/new/' style='margin-left: 25px') Create New Team
   table.table
     thead
       tr
@@ -10,7 +11,7 @@ block content
         th(scope='col') Project Description
         th(scope='col') Max Team Size
         th(scope='col') Is Full?
-        th(scope='col') Delete?
+        th(scope='col') Join?
         th
         th
     tbody
@@ -22,9 +23,8 @@ block content
           td= team.maxTeamSize
           td= (team.isFull == true? 'Yes':'No')
           td
-            form(action='/teams/' + team._id + '/delete' method="POST" style="float: right; width: 87% ")
-              button.btn.btn-danger(type='submit') Delete
-          td
-            a.btn.btn-primary(href='./teams/' + team.id + '/update') Edit
-          td
-            a.btn.btn-primary(href='/users/team/' + team._id) Add User
+            if !team.isFull
+              if team.admin!=currentUser.id
+                if currentUser.lookingForGroup
+                  form(action='/teams/' + team._id + '/join' method="POST" style="float: right; width: 87% ")
+                    button.btn.btn-success(type='submit') Join

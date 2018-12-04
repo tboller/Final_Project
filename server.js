@@ -21,7 +21,9 @@ var teamSchema = new mongoose.Schema({
   teamName: {type: String, required: true},
   projectDescription: {type: String, required: true },
   maxTeamSize: {type: Number, required: true, default: 3},
-  isFull: {type: Boolean, required: true, default: false}
+  isFull: {type: Boolean, required: true, default: false},
+  currentTeamSize: {type: Number, required: true, default:1},
+  admin: {type: mongoose.Schema.Types.ObjectId, required:true}
 });
 let Team = mongoose.model('Team', teamSchema);
 
@@ -297,7 +299,7 @@ db.once('open', function() {
         if(err) {
           res.render("error", {err});
         } else {
-          res.render('teams', {teamList: teams});
+          res.render('teams', {teamList: teams, currentUser:currentUser});
         }
       });
     }
@@ -325,11 +327,15 @@ db.once('open', function() {
           if(err){
             res.render('error', {});
           } else {
+            let authorized = false;
+            if(currentUser.id == team.admin){
+              authorized = true
+            }
             if(teamMembers === null){
-              res.render('team_display', {title: "Show Team", team: team, userList: {}, teamFull: team.isFull})
+              res.render('team_display', {title: "Show Team", team: team, userList: {}, teamFull: team.isFull, authorized:authorized, currentUser: currentUser})
             } else {
               console.log(teamMembers)
-              res.render('team_display', {title: "Show Team", team: team, userList: teamMembers, teamFull: team.isFull})
+              res.render('team_display', {title: "Show Team", team: team, userList: teamMembers, teamFull: team.isFull, authorized:authorized, currentUser: currentUser})
             }
           }
         });
@@ -369,14 +375,28 @@ db.once('open', function() {
     //sends the form from the edit/create team back to be added
     //or updated to the database
     //This is just until we completely hash out the pages, to test the api CRUD
-    console.log("clicked post /teams/new");
-    let newTeam = new Team(req.body);
+    let team = req.body
+    team.admin = currentUser.id
+    //console.log(test);
+    let newTeam = new Team(team);
     newTeam.save(function (err, savedTeam) {
       if (err) {
         console.log(err)
         res.status(500).send("Internal Error")
       } else {
-        // res.send(savedTeam)
+        User.updateOne({"_id": currentUser.id},{teamId: savedTeam.id, lookingForMembers:true, lookingForGroup:false, partOfGroup:true}, function(err, result){
+          if(err){
+            res.render("error",{})
+          } else {
+            User.findById(currentUser.id,function(err,user){
+              if(err){
+                res.render("error", {})
+              } else {
+                currentUser = user
+              }
+            })
+          }
+        })
         res.redirect('/teams');
       }
     });
@@ -397,13 +417,27 @@ db.once('open', function() {
     });
   });
 
-  app.post('/teams/:tid/edit/removemember/:uid', (req,res)=>{
+  app.post('/teams/edit/removemember/:uid', (req,res)=>{
     //Removes user uid from team tid and updates the form to indicate so
     //adds user back to the available members list
     //verifies that current user is admin of team tid
+    let id = ObjectID.createFromHexString(req.params.uid);
+    User.updateOne({"_id": id},{teamId: null, lookingForGroup: true, partOfGroup: false}, function(err, localRes) {
+      if(err) {
+        console.log(err);
+        res.render('error', {});
+      } else {
+        Team.findById(currentUser.teamId, function(err, team){
+          Team.updateOne({"_id":currentUser.teamId},{currentTeamSize:team.currentTeamSize-1, isFull:false}, function(err,result){
+
+          })
+        });
+        res.redirect('/teams');
+      }
+    });
   });
 
-  app.post('/teams/:tid/edit/addmember/:uid', (req,res)=>{
+  app.post('/teams/edit/addmember/:uid', (req,res)=>{
     //Adds user uid to the tid team and updates the form to indicate so
     //removes this user from available members list
     //verifies that current user is admin of team tid
@@ -430,12 +464,23 @@ db.once('open', function() {
 
   app.post('/teams/leave',(req,res)=>{
     //allows a user to leave their team and adds them back to the available users list
-    User.updateOne({"_id": currentUser.id},{teamId: null}, function(err, localRes) {
+    Team.findById(currentUser.teamId, function(err, team){
+      Team.updateOne({"_id":currentUser.teamId},{currentTeamSize:team.currentTeamSize-1, isFull:false}, function(err,result){
+      })
+    });
+    User.updateOne({"_id": currentUser.id},{teamId: null, lookingForGroup: true, partOfGroup: false}, function(err, localRes) {
       if(err) {
         console.log(err);
         res.render('error', {});
       } else {
-        res.redirect("/teams/" + tid);
+        User.findById({"_id": currentUser.id}, function(err, user){
+          if(err) {
+            res.render("error", {err});
+          } else {
+            currentUser = user;
+          }
+        });
+        res.redirect("/teams");
       }
     });
   });
@@ -459,25 +504,20 @@ db.once('open', function() {
             console.log("updating current user.. " + currentUser)
           }
         });
-        let teamSize = null;
-        User.find({"teamId":tid}, function(err, teamMembers){
-          if(err){
-            res.render('error', {});
-          } else {
-            if(teamMembers === null){
-              teamSize = 1
-            } else {
-              teamSize = teamMembers.length + 1
-            }
-          }
-        });
-        console.log("team size"+teamSize)
+
         Team.findById({"_id": tid}, function(err, team) {
             if(err){
               res.render('error', {});
             } else {
-              if(teamSize >= team.maxTeamSize){
-                Team.updateOne({"_id":tid},{isFull: true}, function(err,result){
+              if(team.currentTeamSize+1 >= team.maxTeamSize){
+                console.log("current team size is larger or equal to max team size")
+                Team.updateOne({"_id":tid},{isFull: true, currentTeamSize: team.currentTeamSize+1}, function(err,result){
+                  if(err){
+                    res.render("error", {})
+                  }
+                });
+              } else {
+                Team.updateOne({"_id":tid},{currentTeamSize: team.currentTeamSize+1}, function(err,result){
                   if(err){
                     res.render("error", {})
                   }
