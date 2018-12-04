@@ -86,6 +86,7 @@ db.once('open', function() {
     res.render('user_form', {title: "New user", user: {} })
   });
 
+  //done
   app.post('/users/new',(req,res)=>{
     //sends the form from the edit/create team back to be added
     //or updated to the database
@@ -104,12 +105,14 @@ db.once('open', function() {
     });
   });
 
+  //done
   app.get('/users/current', (req,res)=>{
     //this path from the log in page sends you to the view
     //profile page of the profile of the person that logged in.
     //res.render('user_display', {title: "Current User", user: currentUser})
     res.render('user_display', {title: "Current User", user: currentUser, authorized: true})
   });
+
 
   app.post('/users/populate', (req,res)=>{
     //Posted Data will be used for testing and immediate population of db
@@ -141,6 +144,7 @@ db.once('open', function() {
     });
   });
 
+  //done
   app.get('/users/current/edit', (req,res)=>{
     //Will send the user to the edit profile page with the data from
     //their current profile already filled in to the blanks
@@ -158,6 +162,7 @@ db.once('open', function() {
     });
   });
 
+  //done
   app.post('/users/current/edit', (req, res) => {
     //console.log("clicked post /users/:id/update");
     User.updateOne({"_id": currentUser.id},{$set: req.body}, function(err, updatedUser) {
@@ -180,6 +185,7 @@ db.once('open', function() {
     });
   });
 
+  //TODO: still needs to update the team full flag to false if they were a part of a team. 
   app.post('/users/current/delete',(req,res)=>{
     //will delete the current users profile and then send them back
     //to the log in page.
@@ -190,6 +196,7 @@ db.once('open', function() {
     });
   });
 
+  //done
   app.get('/users',(req,res)=>{
     //redirects to the all profiles page from which the current users
     //can view all profiles. Clicking on one of the cards will send them
@@ -204,6 +211,7 @@ db.once('open', function() {
     });
   });
 
+  //done
   app.get('/users/:id',(req,res, next)=>{
     //Will send to the view profile page loaded with the information for
     //the profile that matches the id
