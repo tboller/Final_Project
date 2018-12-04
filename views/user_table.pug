@@ -15,10 +15,10 @@ table.table
         td= user.email
         td= user.partOfGroup
         td
-          if addingUserToTeam
-            form(action='/users/' + user._id + '/delete' method="POST" style="float: right; width: 87% ")
-              button.btn.btn-danger(type='submit') Delete
+          if user.lookingForGroup && currentUser.lookingForMembers && !team.isFull
+            form(action='/teams/edit/addmember/'+user._id method="POST" style="float: right; width: 87% ")
+              button.btn.btn-success(type='submit') Add Member
         td
-          if removingUserFromTeam
+          if removingUserFromTeam && user.id != currentUser.id
             form(action='/teams/edit/removemember/'+user._id method="POST" style="float: right; width: 87% ")
               button.btn.btn-danger(type='submit') Remove

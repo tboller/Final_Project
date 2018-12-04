@@ -1,7 +1,7 @@
 extends layout.pug
 
 block content
-  h1.mt-5= teamName
+  h1.mt-5= title
   form(method="POST")
     .form-group
       label(for='teamName') Team Name
@@ -10,10 +10,11 @@ block content
       label(for='projectDescription') Project Description
       input#projectDescription.form-control(type='text', placeholder='Enter Description',
       name="projectDescription", value = team.projectDescription)
-    .form-group
-      label(for='maxTeamSize') Maximum Team Size
-      input#maxTeamSize.form-control(type='text', placeholder='Enter Maximum Number of Members',
-      name="maxTeamSize", value = team.maxTeamSize)
+    if title != "Update Team"
+      .form-group
+        label(for='maxTeamSize') Maximum Team Size
+        input#maxTeamSize.form-control(type='text', placeholder='Enter Maximum Number of Members',
+        name="maxTeamSize", value = team.maxTeamSize)
 
     p Team Members
     include user_table.pug

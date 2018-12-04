@@ -186,13 +186,21 @@ db.once('open', function() {
     });
   });
 
-  //TODO: still needs to update the team full flag to false if they were a part of a team.
+  //done
   app.post('/users/current/delete',(req,res)=>{
     //will delete the current users profile and then send them back
     //to the log in page.
     Team.findById(currentUser.teamId, function(err, team){
       if(currentUser.id == team.admin){
-        res.redirect('/users/'+team.id+'/delete') // delete the team.. cant exist without admin
+        Team.deleteOne({"_id": currentUser.teamId}, function(err, product) {
+        });
+        User.find({"teamId":currentUser.teamId},function(err,teamMembers){
+          teamMembers.forEach(user =>{
+            console.log(user)
+            User.updateOne({"_id":user.id},{teamId: null, lookingForGroup:true, partOfGroup:false}, function(err, res){
+            });
+          })
+        });
       } else {
         Team.updateOne({"_id":team.id},{currentTeamSize:team.currentTeamSize-1, isFull:false}, function(err,result){
         })
@@ -219,7 +227,9 @@ db.once('open', function() {
         if(err) {
           res.render("error", {err});
         } else {
-          res.render('users', {userList: users});
+          Team.findById(currentUser.teamId,function(err, team){
+            res.render('users', {userList: users, currentUser:currentUser, team: team});
+          })
         }
       });
     }
@@ -322,7 +332,7 @@ db.once('open', function() {
     res.render('team_form', {title: "New team", team: {}, userList: {}})
   });
 
-  //cant seem to get the team members list to populate
+  //done
   app.get('/teams/:id',(req, res, next) =>{
     //sends you to the team information page filled in with the
     //details about the team that matches the tid.
@@ -334,7 +344,7 @@ db.once('open', function() {
 				console.log(err)
 				res.status(500).send("Internal Error")
 			} else {
-        User.find({"_teamId":id}, function(err, teamMembers){
+        User.find({"teamId":id}, function(err, teamMembers){
           if(err){
             res.render('error', {});
           } else {
@@ -372,9 +382,9 @@ db.once('open', function() {
               res.render("error",{})
             } else {
               if(teamMembers === null){
-                res.render('team_form', {title: "Update Team", team: team, userList: {}, removingUserFromTeam: true})
+                res.render('team_form', {title: "Update Team", team: team, userList: {}, removingUserFromTeam: true, currentUser: currentUser})
               } else {
-                res.render('team_form', {title: "Update Team", team: team, userList: teamMembers, removingUserFromTeam: true})
+                res.render('team_form', {title: "Update Team", team: team, userList: teamMembers, removingUserFromTeam: true, currentUser: currentUser})
               }
             }
           })
@@ -415,7 +425,7 @@ db.once('open', function() {
     });
   });
 
-  //done?
+  //done
   app.post('/teams/:id/update', (req, res) => {
     console.log("clicked post /teams/:id/update");
 
@@ -425,7 +435,7 @@ db.once('open', function() {
         console.log(err);
         res.render('error', {});
       } else {
-        // res.redirect("/teams/" + id);
+
         res.redirect("/teams");
       }
     });
@@ -452,29 +462,62 @@ db.once('open', function() {
     });
   });
 
-  //TODO: The update page isn't really working nicely to be able to add members.
+  //done
   app.post('/teams/edit/addmember/:uid', (req,res)=>{
     //Adds user uid to the tid team and updates the form to indicate so
     //removes this user from available members list
     //verifies that current user is admin of team tid
+
+    let id = ObjectID.createFromHexString(req.params.uid);
+    User.updateOne({"_id":id}, {teamId:currentUser.teamId, lookingForGroup:false, partOfGroup:true}, function(err, result){
+      Team.findById({"_id": currentUser.teamId}, function(err, team) {
+          if(err){
+            res.render('error', {});
+          } else {
+            if(team.currentTeamSize+1 >= team.maxTeamSize){
+              console.log("current team size is larger or equal to max team size")
+              Team.updateOne({"_id":team.id},{isFull: true, currentTeamSize: team.currentTeamSize+1}, function(err,result){
+                if(err){
+                  res.render("error", {})
+                }
+              });
+            } else {
+              Team.updateOne({"_id":tid},{currentTeamSize: team.currentTeamSize+1}, function(err,result){
+                if(err){
+                  res.render("error", {})
+                }
+              });
+            }
+          }
+        });
+        res.redirect('/users')
+    })
+
   });
 
-  //TODO: Need to deal with changing the information for the users of the team
+  //done
   app.post('/teams/:id/delete',(req,res)=>{
     //deletes the team and adds all users back to the available members list
     //verifies that current user is admin of team tid
-
-    // Need to do the verification
-
-
       console.log("/teams/:id/delete post");
       let id = ObjectID.createFromHexString(req.params.id);
       // need to lookup any users that have this teams id
       // and remove the Id, set the looking for group to true,
       // and set the part of group to false (do we need both of these fields?)
 
+      User.find({"teamId":id},function(err,teamMembers){
+        teamMembers.forEach(user =>{
+          console.log(user)
+          User.updateOne({"_id":user.id},{teamId: null, lookingForGroup:true, partOfGroup:false}, function(err, res){
+          });
+        })
+      });
+
       Team.deleteOne({"_id": id}, function(err, product) {
         console.log("hit the delete one");
+        User.findById(currentUser.id, function(err,result){
+          currentUser = result;
+        })
         res.redirect("/Teams");
       });
   });
